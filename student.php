@@ -5,7 +5,6 @@ if(isset($_POST['submit'])){
     $gender = $_POST['gender'];
     $age = $_POST['age'];
     
-
     $host = 'localhost';
     $user = 'root';
     $pass ='';
@@ -13,11 +12,19 @@ if(isset($_POST['submit'])){
 
     $conn = mysqli_connect($host,$user,$pass,$dbname);
 
-    $sql = "INSERT INTO student(firstName,lastName,gender,age) value ('$firstName','$lastName','$gender','$age')";
-    if (!mysqli_query($conn, $sql)) {
-        die("Error: " . $sql . "<br>" . mysqli_error($conn));
+    if (!$conn) {
+        die("Connection failed: " . mysqli_connect_error());
     }
-    mysqli_query($conn,$sql);
+
+    $stmt = $conn->prepare("INSERT INTO student (firstName, lastName, gender, age) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param("sssi", $firstName, $lastName, $gender, $age);
+
+    if (!$stmt->execute()) {
+        die("Error: " . $stmt->error);
+    }
+
+    $stmt->close();
+    $conn->close();
 }
 ?>
 <!DOCTYPE html>
